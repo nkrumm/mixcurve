@@ -1,4 +1,9 @@
+import os
 from setuptools import setup
+
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+
 
 setup(name='mixcurve',
       version='0.1',
@@ -9,4 +14,5 @@ setup(name='mixcurve',
       license='MIT',
       packages=['mixcurve'],
       include_package_data=True,
-      zip_safe=False)
+      zip_safe=False,
+      install_requires=required)
