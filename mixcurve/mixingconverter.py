@@ -7,6 +7,8 @@ from scipy.interpolate import UnivariateSpline
 DATA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data/table_data.tsv")
 TABLES = pd.read_csv(DATA_PATH, sep="\t", index_col="table")
 
+np.seterr(divide='ignore')
+
 class MixingConverter(object):
     """docstring for MixingConverter"""
     def __init__(self, table_name="vitk", method="curve_fit"):
@@ -118,16 +120,19 @@ class MixingConverter(object):
         ax.set_ylabel("% Factor Present")
         
     def plot_ptt_table(self, ax=None):
+        import matplotlib.pyplot as plt
         if not ax:
             fig, ax = plt.subplots(figsize=(6,5))
         self._plot_table("PTT", ax)
 
     def plot_pt_table(self, ax=None):
+        import matplotlib.pyplot as plt
         if not ax:
             fig, ax = plt.subplots(figsize=(6,5))
         self._plot_table("PT", ax)
     
     def plot_tables(self):
+        import matplotlib.pyplot as plt
         fig, axes = plt.subplots(ncols=2, nrows=1, figsize=(12,5))
         self.plot_pt_table(ax=axes[0])
         self.plot_ptt_table(ax=axes[1])
