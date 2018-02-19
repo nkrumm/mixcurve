@@ -1,3 +1,3 @@
 
-from mixcurve.mixingconverter import MixingConverter
+from mixcurve.mixingconverter import MixingConverter, TABLES
 from mixcurve.probabilisticconverter import ProbabilisticMixingConverter
