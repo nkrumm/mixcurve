@@ -69,12 +69,14 @@ class ProbabilisticMixingConverter(MixingConverter):
         self.measure = model["measure"]
 
         
-    def percent_corrected_dist(self, straight, mix, pool, n_iters=100000):
+    def percent_corrected_dist(self, straight, mix, pool, n_iters=100000, sigma=None):
         if not self.model_loaded:
             raise ModelException("Build or load a model first")
 
         # Step 1: Draw random values from normal distribution for Stright/Mix/Pool
         # The distribution represents the error inherent to the measured results
+        if sigma:
+            self.sigma_seconds = sigma
         assay_params = {"sigma": self.sigma_seconds, "n_iters": n_iters}
         straight_dist = self._normal_dist(straight, **assay_params)
         mix_dist = self._normal_dist(mix, **assay_params)
