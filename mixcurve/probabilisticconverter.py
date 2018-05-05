@@ -30,7 +30,7 @@ class ProbabilisticMixingConverter(MixingConverter):
         except ZeroDivisionError:
             return 100
 
-    def build_model(self, measure, sigma_seconds=0.5, sigma_percent=5, n_iters=1000):
+    def build_model(self, measure, sigma_seconds=0.5, sigma_factor_level=5, n_iters=1000):
         if self.method != "curve_fit":
             raise ModelException("Model building is supported for the "
                                  "`curve_fit` MixingConverter only!")
@@ -41,21 +41,21 @@ class ProbabilisticMixingConverter(MixingConverter):
         out = np.zeros([n_iters,3])
         for i in range(n_iters):
             x = self.table[measure] + np.random.normal(0, sigma_seconds, size=s)
-            y = self.table.factor_level + np.random.normal(0, sigma_percent, size=s)
+            y = self.table.factor_level + np.random.normal(0, sigma_factor_level, size=s)
             params, _ = curve_fit(self._fwd_func, x, y,p0=(40000, 0.1, 20), ftol=0.001, xtol=0.001)
             out[i, :] = params
 
         self.out = out
         self.measure = measure
         self.sigma_seconds = sigma_seconds
-        self.sigma_percent = sigma_percent
+        self.sigma_factor_level = sigma_factor_level
         self.model_loaded = True
 
     def save_model(self, filename):
         model = {
             "out": self.out,
             "sigma_seconds": self.sigma_seconds,
-            "sigma_percent": self.sigma_percent,
+            "sigma_factor_level": self.sigma_factor_level,
             "model_loaded": self.model_loaded,
             "measure": self.measure
         }
@@ -67,7 +67,7 @@ class ProbabilisticMixingConverter(MixingConverter):
             model = pickle.load(f)
         self.out = model["out"]
         self.sigma_seconds = model["sigma_seconds"]
-        self.sigma_percent = model["sigma_percent"]
+        self.sigma_factor_level = model["sigma_factor_level"]
         self.model_loaded = model["model_loaded"]
         self.measure = model["measure"]
 
