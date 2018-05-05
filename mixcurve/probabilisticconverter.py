@@ -21,6 +21,9 @@ class ProbabilisticMixingConverter(MixingConverter):
     def _fwd_func(self, x, a, c, d):
         return a*np.exp(-c*x)+d
 
+    def _fwd_func_linear(self, x):
+        return np.interp(x, self.table[self.measure], self.table.factor_level)
+
     def _percent_corrected(self, straight, mix, pool, target):
         try:
             return 100. * (mix - straight) / (target - straight)
@@ -69,7 +72,7 @@ class ProbabilisticMixingConverter(MixingConverter):
         self.measure = model["measure"]
 
         
-    def percent_corrected_dist(self, straight, mix, pool, n_iters=100000, sigma=None):
+    def percent_corrected_dist(self, straight, mix, pool, n_iters=100000, sigma=None, use_method='curve'):
         if not self.model_loaded:
             raise ModelException("Build or load a model first")
 
@@ -83,15 +86,21 @@ class ProbabilisticMixingConverter(MixingConverter):
         pool_dist = self._normal_dist(pool, **assay_params)
 
         # Step 2: Select random sets of parameters from the curve_fit model
-        curve_fit_param_indices = np.random.randint(0, self.out.shape[0]-1, size=n_iters)
-        curve_fit_params = self.out[curve_fit_param_indices, :].T
-
-        # Step 3: Transform the Straight/Mix/Pool values (seconds) to factor level, 
-        # based on the curve_fit_params selected in step 2
-        # _fl == "_factor_level"
-        straight_fl = self._fwd_func(straight_dist, *curve_fit_params)
-        mix_fl = self._fwd_func(mix_dist, *curve_fit_params)
-        pool_fl = self._fwd_func(pool_dist, *curve_fit_params)
+        if use_method == 'curve':
+            curve_fit_param_indices = np.random.randint(0, self.out.shape[0]-1, size=n_iters)
+            curve_fit_params = self.out[curve_fit_param_indices, :].T
+            # Step 3: Transform the Straight/Mix/Pool values (seconds) to factor level, 
+            # based on the curve_fit_params selected in step 2
+            # _fl == "_factor_level"
+            straight_fl = self._fwd_func(straight_dist, *curve_fit_params)
+            mix_fl = self._fwd_func(mix_dist, *curve_fit_params)
+            pool_fl = self._fwd_func(pool_dist, *curve_fit_params)
+        elif use_method == 'linear':
+            straight_fl = self._fwd_func_linear(straight_dist)
+            mix_fl = self._fwd_func_linear(mix_dist)
+            pool_fl = self._fwd_func_linear(pool_dist)
+        else:
+            raise ModelException("unknown method: %s" % use_method)
 
         # Step 4: Calculate the target factor level (Target_fl)
         # And then the perecent_corrected
