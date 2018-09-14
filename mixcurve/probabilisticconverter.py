@@ -67,7 +67,7 @@ class ProbabilisticMixingConverter(MixingConverter):
             model = pickle.load(f)
         self.out = model["out"]
         self.sigma_seconds = model["sigma_seconds"]
-        self.sigma_factor_level = model["sigma_factor_level"]
+        #self.sigma_factor_level = model["sigma_factor_level"]
         self.model_loaded = model["model_loaded"]
         self.measure = model["measure"]
 
